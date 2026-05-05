@@ -137,7 +137,6 @@ func _apply_camera_limits() -> void:
 
 func spawn_enemies_for_chunks() -> void:
 	if current_level == null: return
-
 	var enemy_multiplier: float = _get_enemy_multiplier_for_level()
 	var spawn_entries: Array[Dictionary] = _collect_spawn_entries()
 	if spawn_entries.is_empty():
@@ -433,9 +432,10 @@ func _random_spawn_jitter() -> Vector2:
 	return Vector2(randf_range(-18.0, 18.0), randf_range(-8.0, 8.0))
 
 func _get_enemy_multiplier_for_level() -> float:
-	if current_level and current_level.has_meta("level_config"):
-		var cfg: Dictionary = current_level.get_meta("level_config") as Dictionary
-		return clampf(float(cfg.get("enemy_multiplier", 1.0)), 0.25, 3.0)
+	# DISABLED (for now)
+	#if current_level and current_level.has_meta("level_config"):
+		#var cfg: Dictionary = current_level.get_meta("level_config") as Dictionary
+		#return clampf(float(cfg.get("enemy_multiplier", 1.0)), 0.25, 3.0)
 	return 1.0
 
 func clear_active_enemies() -> void:

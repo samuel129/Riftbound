@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b37tqjbpojg8q" path="res://scenes/hud.gd" id="1_ahhtf"]
 [ext_resource type="Theme" uid="uid://cjtgmcnr4asnk" path="res://assets/fonts/button.tres" id="2_oo0fn"]
+[ext_resource type="PackedScene" uid="uid://dg70byhjiay8m" path="res://scenes/controls.tscn" id="3_5ysmq"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oo0fn"]
 bg_color = Color(0.24316686, 0.24316695, 0.2431668, 1)
@@ -133,6 +134,7 @@ shader_parameter/pixel_filter = 700.0
 
 [node name="HUD" type="CanvasLayer" unique_id=193902336]
 script = ExtResource("1_ahhtf")
+bar_lerp_speed = null
 
 [node name="Control" type="Control" parent="." unique_id=1439356343]
 layout_mode = 3
@@ -272,6 +274,11 @@ z_index = -2
 material = SubResource("ShaderMaterial_5ysmq")
 layout_mode = 2
 mouse_filter = 2
+
+[node name="SettingsUI" parent="PauseMenu" unique_id=801336002 instance=ExtResource("3_5ysmq")]
+visible = false
+z_index = 3
+layout_mode = 2
 
 [connection signal="pressed" from="PauseMenu/MarginContainer/VBoxContainer/Resume" to="." method="_on_resume_pressed"]
 [connection signal="pressed" from="PauseMenu/MarginContainer/VBoxContainer/Settings" to="." method="_on_settings_pressed"]

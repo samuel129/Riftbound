@@ -1,5 +1,7 @@
 extends Node2D
 @onready var mat = $TransitionLayer/ColorRect.material
+var is_overlay: bool = false
+
 func _ready():
 	$TransitionLayer/ColorRect.visible = true
 	mat.set("shader_parameter/luminance_cutoff", 1.0)

@@ -32,8 +32,10 @@ var dimmer: ColorRect = null
 
 func _ready() -> void:
 	# Keep HUD updating even if we pause the game for the level-up popup
+	add_to_group("hud")	
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_levelup_popup()
+	$PauseMenu/SettingsUI.visible = false
 
 func bind_player(p: Node) -> void:
 	player_ref = p
@@ -321,13 +323,19 @@ func _toggle_pause_menu() -> void:
 	var is_open = pause_menu.visible
 	pause_menu.visible = not is_open
 	get_tree().paused = not is_open
+	if dimmer:
+		dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _on_resume_pressed() -> void:
 	pause_menu.visible = false
 	get_tree().paused = false
 
 func _on_settings_pressed() -> void:
-	print("Settings not implemented yet")
+	$PauseMenu/SettingsUI.visible = true
+	$PauseMenu/SettingsUI.is_overlay = true
+
+func hide_settings():
+	$PauseMenu/SettingsUI.visible = false
 
 func _on_save_exit_pressed() -> void:
 	get_tree().paused = false

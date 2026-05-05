@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://cvrnu24fea367" path="res://assets/art/ui/xbutton hover.png" id="4_ihl6s"]
 [ext_resource type="Script" uid="uid://thqrga1aq8mj" path="res://scenes/options_menu.gd" id="5_dloai"]
 [ext_resource type="Shader" uid="uid://blshmg1ouxhc7" path="res://assets/art/ui/swirl_bg.gdshader" id="5_jlst0"]
-[ext_resource type="Script" uid="uid://uo3nvs1m413i" path="res://scenes/audio_options.gd" id="6_k6bol"]
+[ext_resource type="Script" path="res://scenes/audio_options.gd" id="6_k6bol"]
 [ext_resource type="Theme" uid="uid://dv4eewpm0yj8e" path="res://assets/fonts/newbutton_theme.tres" id="7_k6bol"]
 [ext_resource type="Script" uid="uid://cqfief4q3jql7" path="res://scenes/keybinds_settings.gd" id="7_t622t"]
 [ext_resource type="PackedScene" uid="uid://cq6rdtya1cfb8" path="res://scenes/input_button.tscn" id="8_vwfca"]
@@ -38,6 +38,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("2_5tddo")
 
 [node name="Root" type="Control" parent="." unique_id=852341777]
 layout_mode = 1
@@ -52,7 +53,6 @@ grow_vertical = 2
 [node name="ControlBackground" type="Sprite2D" parent="Root" unique_id=1323416255]
 position = Vector2(161, 93)
 scale = Vector2(2.3833334, 1.8333333)
-script = ExtResource("2_5tddo")
 
 [node name="BackButton" type="Button" parent="Root" unique_id=1301061782]
 layout_mode = 0
@@ -84,6 +84,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 1.0
+offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
@@ -246,8 +248,7 @@ theme_override_colors/font_hover_color = Color(0.23921569, 0, 0.42745098, 1)
 theme_override_font_sizes/font_size = 8
 text = "Apply"
 
-[connection signal="pressed" from="Root/BackButton" to="Root/ControlBackground" method="_on_back_button_pressed"]
-[connection signal="pressed" from="Root/Exit" to="Root/ControlBackground" method="_on_exit_pressed"]
+[connection signal="pressed" from="Root/BackButton" to="." method="_on_back_button_pressed"]
 [connection signal="mouse_exited" from="OptionsMenu/AudioOptions/VBoxContainer/MasterHBoxContainer/MasterSlider" to="OptionsMenu/AudioOptions" method="_on_master_slider_mouse_exited"]
 [connection signal="mouse_exited" from="OptionsMenu/AudioOptions/VBoxContainer/SFXHBoxContainer2/SFXSlider" to="OptionsMenu/AudioOptions" method="_on_sfx_slider_mouse_exited"]
 [connection signal="mouse_exited" from="OptionsMenu/AudioOptions/VBoxContainer/MusicHBoxContainer3/MusicSlider" to="OptionsMenu/AudioOptions" method="_on_music_slider_mouse_exited"]

@@ -552,7 +552,7 @@ tile_map_data = PackedByteArray("AAABAAAAAAAGAAAAAAACAAAAAAAGAAAAAAADAAAAAAAGAAA
 tile_set = SubResource("TileSet_dx7ac")
 
 [node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1866907938]
-position = Vector2(136, -32)
+position = Vector2(152, -8)
 
 [node name="Entry" type="Marker2D" parent="." unique_id=176456456]
 position = Vector2(8, 0)
