@@ -93,39 +93,41 @@ func _resolve_theme_row(level_config: Dictionary) -> int:
 		return clampi(theme_row, 0, NUM_THEMES - 1)
 	if bool(level_config.get("boss_stage", false)) or bool(level_config.get("mini_boss_stage", false)):
 		var style_index: int = _get_boss_arena_style_index(level_config)
-		var boss_theme_rows: Array[int] = [1, 4, 6]
+		var boss_theme_rows: Array[int] = [1, 4, 6, 6]
 		return boss_theme_rows[style_index]
 	return randi() % NUM_THEMES
 
 func _apply_theme_to_chunk(chunk: Node2D, theme_row: int) -> void:
-	var tilemap := chunk.get_node_or_null("Foreground") as TileMapLayer
+	var tilemaps = [
+		chunk.get_node_or_null("Foreground") as TileMapLayer,
+		chunk.get_node_or_null("BossEntryWall") as TileMapLayer,
+		chunk.get_node_or_null("BossExitWall") as TileMapLayer
+	]
+	for tilemap in tilemaps:
+		if tilemap == null or not (tilemap is TileMapLayer): continue
 
-	if tilemap == null:
-		print("No Foreground in:", chunk.name)
-		return
+		var used_cells = tilemap.get_used_cells()
 
-	var used_cells = tilemap.get_used_cells()
+		for cell in used_cells:
+			var source_id = tilemap.get_cell_source_id(cell)
+			if source_id == -1:
+				continue
 
-	for cell in used_cells:
-		var source_id = tilemap.get_cell_source_id(cell)
-		if source_id == -1:
-			continue
+			var atlas_coords = tilemap.get_cell_atlas_coords(cell)
 
-		var atlas_coords = tilemap.get_cell_atlas_coords(cell)
+			# Normalize BEFORE applying theme
+			var base_y: int = atlas_coords.y % ROW_HEIGHT
 
-		# Normalize BEFORE applying theme
-		var base_y: int = atlas_coords.y % ROW_HEIGHT
+			var new_coords = Vector2i(
+				atlas_coords.x,
+				base_y + theme_row * ROW_HEIGHT
+			)
 
-		var new_coords = Vector2i(
-			atlas_coords.x,
-			base_y + theme_row * ROW_HEIGHT
-		)
-
-		tilemap.set_cell(cell, source_id, new_coords)
+			tilemap.set_cell(cell, source_id, new_coords)
 
 func _get_boss_arena_style_index(level_config: Dictionary) -> int:
 	var stage: int = int(level_config.get("stage", 3))
-	return maxi(int(floor(float(stage) / 3.0)) - 1, 0) % 3
+	return maxi(int(floor(float(stage) / 3.0)) - 1, 0) % 4
 
 func _decorate_stage_chunk(chunk: Node2D, theme_row: int, chunk_index: int) -> void:
 	var foreground: TileMapLayer = chunk.get_node_or_null("Foreground") as TileMapLayer
@@ -332,8 +334,10 @@ func _decorate_boss_arena(chunk: Node2D, level_config: Dictionary) -> void:
 			_add_blade_arena_decoration(decoration_root)
 		1:
 			_add_pyromancer_arena_decoration(decoration_root)
-		_:
+		2:
 			_add_guardian_arena_decoration(decoration_root)
+		3:
+			_add_switcher_arena_decoration(decoration_root)
 
 func _add_blade_arena_decoration(parent: Node2D) -> void:
 	_add_polygon(parent, "ColdStoneBack", Color(0.07, 0.08, 0.16, 1.0), PackedVector2Array([Vector2(0, -160), Vector2(720, -160), Vector2(720, 32), Vector2(0, 32)]), -8)
@@ -346,7 +350,7 @@ func _add_blade_arena_decoration(parent: Node2D) -> void:
 		_add_line(parent, "BladeCrack%d" % index, Color(0.48, 0.52, 0.72, 0.58), PackedVector2Array([Vector2(x_start, -4), Vector2(x_start + 22.0, -18), Vector2(x_start + 54.0, -10), Vector2(x_start + 84.0, -24)]), 1.0, -4)
 
 func _add_pyromancer_arena_decoration(parent: Node2D) -> void:
-	_add_polygon(parent, "AshBack", Color(0.12, 0.04, 0.03, 1.0), PackedVector2Array([Vector2(184, -160), Vector2(720, -160), Vector2(720, 32), Vector2(184, 32)]), -8)
+	_add_polygon(parent, "AshBack", Color(0.12, 0.04, 0.03, 1.0), PackedVector2Array([Vector2(0, -160), Vector2(720, -160), Vector2(720, 32), Vector2(0, 32)]), -8)
 	_add_polygon(parent, "HeatFloorWash", Color(0.26, 0.07, 0.03, 0.78), PackedVector2Array([Vector2(192, -10), Vector2(704, -10), Vector2(704, 34), Vector2(192, 34)]), -5)
 	for index in range(6):
 		var x: float = 220.0 + float(index) * 78.0
@@ -357,7 +361,7 @@ func _add_pyromancer_arena_decoration(parent: Node2D) -> void:
 		_add_line(parent, "AshStreak%d" % index, Color(0.82, 0.36, 0.12, 0.4), PackedVector2Array([Vector2(x_base, -124), Vector2(x_base + 26.0, -96), Vector2(x_base + 14.0, -58)]), 1.0, -6)
 
 func _add_guardian_arena_decoration(parent: Node2D) -> void:
-	_add_polygon(parent, "AncientBack", Color(0.04, 0.13, 0.13, 1.0), PackedVector2Array([Vector2(184, -160), Vector2(720, -160), Vector2(720, 32), Vector2(184, 32)]), -8)
+	_add_polygon(parent, "AncientBack", Color(0.04, 0.13, 0.13, 1.0), PackedVector2Array([Vector2(0, -160), Vector2(720, -160), Vector2(720, 32), Vector2(0, 32)]), -8)
 	_add_polygon(parent, "MossFloorWash", Color(0.07, 0.25, 0.2, 0.72), PackedVector2Array([Vector2(192, -10), Vector2(704, -10), Vector2(704, 34), Vector2(192, 34)]), -5)
 	for index in range(6):
 		var x: float = 214.0 + float(index) * 82.0
@@ -366,6 +370,36 @@ func _add_guardian_arena_decoration(parent: Node2D) -> void:
 	for index in range(7):
 		var x_start: float = 206.0 + float(index) * 70.0
 		_add_line(parent, "RootCrack%d" % index, Color(0.34, 0.58, 0.44, 0.5), PackedVector2Array([Vector2(x_start, 4), Vector2(x_start + 18.0, -12), Vector2(x_start + 48.0, -8), Vector2(x_start + 70.0, -22)]), 1.0, -4)
+
+func _add_switcher_arena_decoration(parent: Node2D) -> void:
+	_add_polygon(parent, "SwitcherBack", Color(0.06, 0.06, 0.08, 1.0), PackedVector2Array([Vector2(0, -160), Vector2(720, -160), Vector2(720, 32), Vector2(0, 32)]), -8)
+	_add_polygon(parent, "SwitcherFloorWash", Color(0.12, 0.13, 0.16, 0.78), PackedVector2Array([Vector2(192, -10), Vector2(704, -10), Vector2(704, 34), Vector2(192, 34)]), -5)
+
+	for index in range(8):
+		var x: float = 210.0 + float(index) * 58.0
+		_add_polygon(parent, "SwitcherPanel%d" % index, Color(0.16, 0.17, 0.22, 0.9), PackedVector2Array([
+			Vector2(x, -128),
+			Vector2(x + 42.0, -128),
+			Vector2(x + 42.0, -86),
+			Vector2(x, -86)
+		]), -7)
+
+		_add_polygon(parent, "SwitcherButton%d" % index, Color(0.55, 0.65, 0.95, 0.42), PackedVector2Array([
+			Vector2(x + 8.0, -118),
+			Vector2(x + 34.0, -118),
+			Vector2(x + 34.0, -96),
+			Vector2(x + 8.0, -96)
+		]), -6)
+
+	for index in range(6):
+		var x_start: float = 204.0 + float(index) * 82.0
+		_add_line(parent, "SwitcherCable%d" % index, Color(0.62, 0.68, 0.88, 0.48), PackedVector2Array([
+			Vector2(x_start, -20),
+			Vector2(x_start + 24.0, -44),
+			Vector2(x_start + 58.0, -28),
+			Vector2(x_start + 86.0, -54)
+		]), 1.5, -4)
+
 
 func _add_polygon(parent: Node2D, node_name: String, color: Color, points: PackedVector2Array, z: int) -> void:
 	var poly: Polygon2D = Polygon2D.new()

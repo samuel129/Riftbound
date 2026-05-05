@@ -37,6 +37,8 @@ func _process(_delta: float) -> void:
 	if player.has_node("HealthComponent"):
 		var hc: HealthComponent = player.get_node("HealthComponent")
 		hud.set_hp(hc.current_health, hc.max_health)
+		if RunManager.run_data:
+			RunManager.run_data.stats["max_health"] = hc.max_health
 
 	if player.has_node("ExperienceComponent"):
 		var xp: ExperienceComponent = player.get_node("ExperienceComponent")
@@ -143,7 +145,7 @@ func spawn_enemies_for_chunks() -> void:
 		return
 
 	if _is_mini_boss_level():
-		_spawn_boss_for_level(_extract_markers_from_entries(spawn_entries))
+		#_spawn_boss_for_level(_extract_markers_from_entries(spawn_entries))
 		return
 
 	for entry in spawn_entries:
@@ -260,7 +262,7 @@ func _spawn_boss_for_level(spawn_markers: Array[Marker2D]) -> void:
 	_spawn_single_enemy(boss_marker.global_position, boss_config, boss_scene)
 
 func _get_boss_profile_for_stage() -> Dictionary:
-	var boss_cycle_index: int = maxi(int(floor(float(current_stage) / 3.0)) - 1, 0) % 3
+	var boss_cycle_index: int = maxi(int(floor(float(current_stage) / 3.0)) - 1, 0) % 4
 	match boss_cycle_index:
 		0:
 			return {
@@ -282,7 +284,7 @@ func _get_boss_profile_for_stage() -> Dictionary:
 				"xp": 145.0,
 				"gold": 48.0,
 			}
-		_:
+		2:
 			return {
 				"scene": boss_guardian_scene,
 				"health": 155.0,
@@ -291,6 +293,18 @@ func _get_boss_profile_for_stage() -> Dictionary:
 				"projectile_damage": 11.0,
 				"xp": 160.0,
 				"gold": 55.0,
+			}
+		_:
+			return {
+				"scene": preload("res://scenes/enemies/boss_swicther.tscn"),
+				"health": 160.0,
+				"damage": 18.0,
+				"speed": 95.0,
+				"projectile_damage": 12.0,
+				"xp": 300.0,
+				"gold": 100.0,
+				"ranged_projectile_count": 8,
+				"ranged_projectile_spread_degrees": 360.0
 			}
 
 func _spawn_enemies_from_entry(entry: Dictionary, enemy_multiplier: float) -> void:
@@ -386,7 +400,7 @@ func _spawn_single_enemy(
 	var scene_to_spawn: PackedScene = scene_override if scene_override != null else enemy_scene
 	if scene_to_spawn == null:
 		return
-
+	print("SPAWN:", scene_to_spawn)
 	var enemy: Node = scene_to_spawn.instantiate()
 	_configure_enemy(enemy, enemy_config)
 	current_level.add_child(enemy)
@@ -616,7 +630,7 @@ func _on_world_map_choice_selected(choice_id: String) -> void:
 	is_world_map_open = false
 	if level_config.is_empty():
 		return
-
+	_save_player_stats_to_run_data()
 	_sync_player_stats_from_run_data()
 	transitioning_stage = true
 	current_stage = RunManager.get_current_stage()
@@ -626,6 +640,26 @@ func _on_world_map_choice_selected(choice_id: String) -> void:
 	$Camera2D.reset_camera()
 	transitioning_stage = false
 
+func _save_player_stats_to_run_data() -> void:
+	if RunManager.run_data == null:
+		return
+	var stats: Dictionary = RunManager.run_data.stats
+	var hc: HealthComponent = player.get_node_or_null("HealthComponent")
+	if hc == null:
+		return
+	stats["health"] = hc.current_health
+	stats["max_health"] = hc.max_health
+	# Movement
+	var movement: MovementComponent = player.get_node_or_null("MovementComponent")
+	if movement:
+		if base_move_speed != 0:
+			stats["move_speed"] = movement.speed / base_move_speed
+	# Jump
+	var jump: JumpComponent = player.get_node_or_null("JumpComponent")
+	if jump:
+		if base_jump_velocity != 0:
+			stats["jump_power"] = jump.jump_velocity / base_jump_velocity
+	
 func _sync_player_stats_from_run_data() -> void:
 	if RunManager.run_data == null:
 		return
@@ -699,3 +733,36 @@ func _input(event: InputEvent) -> void:
 		var xp = player.get_node_or_null("ExperienceComponent")
 		if xp:
 			xp.add_experience(200)
+	if event.is_action_pressed("dev_skip_level"):
+		_dev_skip_level()
+
+
+# DEV TOOL
+func _dev_skip_level() -> void:
+	print("DEV: Skipping level")
+	var xp_comp = player.get_node_or_null("ExperienceComponent")
+	for enemy in active_enemies:
+		if not is_instance_valid(enemy):
+			continue
+		# Grant XP
+		if xp_comp and "xp_reward" in enemy:
+			xp_comp.add_experience(enemy.xp_reward)
+		# Kill enemy
+		if enemy.has_method("receive_damage"):
+			enemy.receive_damage(9999)
+		else:
+			enemy.queue_free()
+
+	_prune_active_enemies()
+	RunManager.mark_current_stage_cleared()
+	_teleport_player_to_dev_marker()
+	
+
+func _teleport_player_to_dev_marker() -> void:
+	if current_level == null:
+		return
+	var dev_marker: Marker2D = current_level.find_child("DevTP", true, false)
+	if dev_marker == null:
+		print("DEV: DevTP marker not found")
+		return
+	player.global_position = dev_marker.global_position

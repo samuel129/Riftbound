@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://uolbnfbotu6d"]
+
+[ext_resource type="Script" uid="uid://c8hfmopuw1njf" path="res://scripts/enemy_grunt.gd" id="1_boss"]
+[ext_resource type="PackedScene" uid="uid://c761t0d71caq2" path="res://scenes/enemies/enemy_projectile.tscn" id="2_projectile"]
+[ext_resource type="Texture2D" uid="uid://dcqgjhkt6eknj" path="res://assets/art/tilesets/swicthersprite.png" id="3_pgour"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(32, 38)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hitbox"]
+size = Vector2(38, 40)
+
+[node name="BossSwicther" type="CharacterBody2D" unique_id=1445764603]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_boss")
+threat_tier = 2
+move_speed = 38.0
+chase_range = 210.0
+patrol_distance = 72.0
+max_health = 600
+attack_damage = 42
+attack_range = 42.0
+attack_vertical_range = 40.0
+attack_windup = 0.34
+attack_cooldown_time = 0.8
+enable_ranged_attack = true
+ranged_projectile_scene = ExtResource("2_projectile")
+ranged_attack_min_range = 58.0
+ranged_attack_vertical_range = 74.0
+ranged_windup = 0.1
+ranged_cooldown_time = 0.5
+ranged_point_blank_chance = 0.08
+projectile_speed = 145.0
+projectile_damage = 25
+ranged_projectile_count = 9
+ranged_projectile_spread_degrees = 360.0
+xp_reward = 190
+gold_reward = 999
+
+[node name="Body" type="Node2D" parent="." unique_id=1016011388]
+
+[node name="Sprite2D" type="Sprite2D" parent="Body" unique_id=1891844269]
+scale = Vector2(0.15946846, 0.20704798)
+texture = ExtResource("3_pgour")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1891553348]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Hitbox" type="Area2D" parent="." unique_id=592237412]
+collision_layer = 4
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox" unique_id=1784294322]
+shape = SubResource("RectangleShape2D_hitbox")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1736007144]

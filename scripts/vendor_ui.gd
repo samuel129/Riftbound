@@ -196,6 +196,9 @@ func _try_purchase_offer(index: int) -> void:
 
 	RunManager.run_data.resources["gold"] = current_gold - cost
 	_apply_offer_effect(offer)
+	var game = get_tree().get_first_node_in_group("game")
+	if game:
+		game._sync_player_stats_from_run_data()
 
 	offer["purchased"] = true
 	_offers[index] = offer

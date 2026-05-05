@@ -302,6 +302,7 @@ func _apply_upgrade(choice: int) -> void:
 
 			current = min(current + 0.05, 1.0)
 			player_ref.set_meta("crit_chance", current)
+			RunManager.run_data.stats["crit_chance"] = current
 
 			# Update HUD label
 			if crit_label:
@@ -318,6 +319,7 @@ func _on_main_menu_pressed() -> void:
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"): # ESC by default
 		_toggle_pause_menu()
+	
 
 func _toggle_pause_menu() -> void:
 	var is_open = pause_menu.visible

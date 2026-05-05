@@ -52,6 +52,7 @@ follow_target = NodePath("../Player")
 [node name="LevelContainer" type="Node2D" parent="." unique_id=1967514355]
 
 [node name="HUD" parent="." unique_id=1541716179 instance=ExtResource("2_hud")]
+bar_lerp_speed = 10.0
 
 [node name="VendorUI" parent="." unique_id=1472423695 instance=ExtResource("8_vendor")]
 visible = false
