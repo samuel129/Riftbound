@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Hero's Journey"
+config/name="RIFTBOUND"
 run/main_scene="uid://cfkbstyyj2vm3"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
